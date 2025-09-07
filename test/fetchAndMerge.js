@@ -13,7 +13,7 @@ QUnit.module("Тестируем функцию fetchAndMerge", function () {
             "id": [1, 2],
             "name": ["Олег", "Мария"],
             "surname": ["Петров", "Иванова"],
-            "status": ["Дуров, верни стену!"],
+            "status": "Дуров, верни стену!",
         };
 
         window.fetch = (url) => {
@@ -56,10 +56,10 @@ QUnit.module("Тестируем функцию fetchAndMerge", function () {
             'https://mailru.example.com/mailid',
         ];
         const expected = {
-            "age": [22],
-            "id": [2],
-            "name": ["Мария"],
-            "surname": ["Иванова"],
+            "age": 22,
+            "id": 2,
+            "name": "Мария",
+            "surname": "Иванова",
         };
 
         window.fetch = (url) => {
@@ -88,7 +88,7 @@ QUnit.module("Тестируем функцию fetchAndMerge", function () {
             "id": [1, 2],
             "name": ["Олег", "Мария"],
             "surname": ["Петров", "Иванов", "Иванова", "Петрова"],
-            "status": ["Дуров, верни стену!"],
+            "status": "Дуров, верни стену!",
         };
 
         window.fetch = (url) => {
@@ -124,10 +124,10 @@ QUnit.module("Тестируем функцию fetchAndMerge", function () {
             'https://mailru.example.com/mailid',
         ];
         const expected = {
-            "age": [22],
-            "id": [2],
-            "name": ["Мария"],
-            "surname": ["Иванова"],
+            "age": 22,
+            "id": 2,
+            "name": "Мария",
+            "surname": "Иванова",
         };
 
         window.fetch = (url) => {
@@ -152,11 +152,11 @@ QUnit.module("Тестируем функцию fetchAndMerge", function () {
             'https://mailru.example.com/mailid',
         ];
         const expected = {
-            "age": [25],
-            "id": [1],
-            "name": ["Олег"],
-            "surname": ["Петров"],
-            "status": ["Дуров, верни стену!"],
+            "age": 25,
+            "id": 1,
+            "name": "Олег",
+            "surname": "Петров",
+            "status": "Дуров, верни стену!",
         };
 
         window.fetch = (url) => {
@@ -215,11 +215,11 @@ QUnit.module("Тестируем функцию fetchAndMerge", function () {
     QUnit.test("Массив из одного элемента", async function (assert) {
         const urls = ['https://vk.example.com/vkid'];
         const expected = {
-            "age": [25],
-            "id": [1],
-            "name": ["Олег"],
-            "surname": ["Петров"],
-            "status": ["Дуров, верни стену!"],
+            "age": 25,
+            "id": 1,
+            "name": "Олег",
+            "surname": "Петров",
+            "status": "Дуров, верни стену!",
         };
 
         window.fetch = (url) => {
@@ -241,6 +241,42 @@ QUnit.module("Тестируем функцию fetchAndMerge", function () {
 
         const result = await fetchAndMergeData(urls);
         assert.deepEqual(result, expected, "Неправильная обработка входных данных");
+    });
+
+    QUnit.test("Проверка корректности добавления данных", async function (assert) {
+        const urls = [
+            'https://vk.example.com/vkid',
+            'https://mailru.example.com/mailid',
+        ];
+        const expected = {
+            "age": [25, 0, 22],
+            "id": [1, 2],
+            "name": ["Олег", "Петя", "Мария"],
+            "surname": ["Петров", "Иванова"],
+            "status": "Дуров, верни стену!",
+        };
+
+        window.fetch = (url) => {
+            const data = {
+                'https://vk.example.com/vkid': {
+                    "id": 1,
+                    "name": ["Олег", "Петя"],
+                    "surname": "Петров",
+                    "age": [25, 0],
+                    "status": "Дуров, верни стену!"
+                },
+                'https://mailru.example.com/mailid': {"id": [2, 1], "name": ["Мария"],
+                    "surname": ["Иванова", "Иванова"], "age": 22},
+            };
+
+            return Promise.resolve({
+                ok: true,
+                json: () => Promise.resolve(data[url]),
+            });
+        };
+
+        const result = await fetchAndMergeData(urls);
+        assert.deepEqual(result, expected, "Неправильная работа с массивами");
     });
 });
 

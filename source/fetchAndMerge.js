@@ -16,11 +16,13 @@
  * //              "id": [1, 2],
  * //              "name": ["Олег", "Мария"],
  * //              "surname": ["Петров", "Иванова"],
- * //              "status": ["Дуров, верни стену!"],
+ * //              "status": "Дуров, верни стену!",
  * //          }
  */
 async function fetchAndMergeData(urls) {
-    if (!Array.isArray(urls)) return null;
+    if (!Array.isArray(urls)) {
+        return null;
+    }
 
     const mergedData = {};
 
@@ -39,22 +41,26 @@ async function fetchAndMergeData(urls) {
 
     responses.forEach(response => {
         const data = response.value;
-        if (typeof data == "object") {
+        if (typeof data === "object") {
             for (let key in data) {
                 const value = data[key];
 
                 if (!(key in mergedData)) {
-                    mergedData[key] = Array.isArray(value) ? value : [value];
+                    mergedData[key] = value;
                 } else {
                     if (Array.isArray(value)) {
                         value.forEach(val => {
-                            if (!mergedData[key].includes(val)) {
+                            if (Array.isArray(mergedData[key]) && !mergedData[key].includes(val)) {
                                 mergedData[key].push(val);
+                            } else if (!Array.isArray(mergedData[key]) && mergedData[key] !== val) {
+                                mergedData[key] = [mergedData[key], val];
                             }
                         });
                     } else {
-                        if (!mergedData[key].includes(value)) {
+                        if (Array.isArray(mergedData[key]) && !mergedData[key].includes(value)) {
                             mergedData[key].push(value);
+                        } else if (!Array.isArray(mergedData[key]) && mergedData[key] !== value) {
+                            mergedData[key] = [mergedData[key], value];
                         }
                     }
                 }
